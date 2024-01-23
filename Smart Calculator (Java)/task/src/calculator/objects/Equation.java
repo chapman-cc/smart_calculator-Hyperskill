@@ -1,32 +1,28 @@
 package calculator.objects;
 
-import calculator.interfaces.ResultAsNumber;
-
 import java.util.Arrays;
 import java.util.function.BinaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Equation implements ResultAsNumber {
+public class Equation  {
     public static final Pattern SYMBOL_PATTERN = Pattern.compile("[+-]+\\D");
     public static final Pattern NUMBER_PATTERN = Pattern.compile("-?\\d+");
     public static final Pattern EQUATION_PATTERN = Pattern.compile("%s\\s*%s\\s*%s".formatted(NUMBER_PATTERN, SYMBOL_PATTERN, NUMBER_PATTERN));
     public static final Pattern EQUATION_PARANTHESIS_PATTERN = Pattern.compile("\\((.+)\\)");
-    private final String originalEquation;
-    private String equation;
+    private final String fullEquation;
 
     public Equation(String equation) {
-        this.originalEquation = equation;
-        this.equation = equation;
-
+        this.fullEquation = equation;
     }
 
-    public String getOriginalEquation() {
-        return originalEquation;
+    public String getEquation() {
+        return fullEquation;
     }
 
     public int calc() {
         int result = 0;
+        String equation = fullEquation;
         Matcher matcher = EQUATION_PARANTHESIS_PATTERN.matcher(equation);
         while (matcher.find()) {
             String subEquationString = matcher.group(1);
