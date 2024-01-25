@@ -3,49 +3,69 @@ package calculator.objects;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static calculator.objects.Equation.NUMBER;
 
-public class Storage {
+public class Storage<T> {
     public static final Pattern VAR_NAME_PATTERN = Pattern.compile("[a-zA-Z]+");
 
-    public final Map<String, Integer> store = new HashMap<>();
+    public final Map<String, T> store = new HashMap<>();
 
-    public void save(String input) {
-        String[] split = input.split("=");
+    public void save(String expression, Function<String, T> assigneeConverter) {
+        String[] split = expression.split("=");
         String assigner = split[0].trim();
-        String assignee = split[1].trim();
-
-        save(assigner, assignee);
+        String assigneeString = split[1].trim();
+        if (Pattern.matches(NUMBER.pattern(), assigneeString)) {
+            T assignee = assigneeConverter.apply(assigneeString);
+            saveValue(assigner, assignee);
+        } else {
+            saveRefValue(assigner, assigneeString);
+        }
     }
 
-    public void save(String identifier, String assignment) {
-        // left hand side is not valid name
+    /*
+     * Save stored value to storage
+     * e.g. n = c
+     * */
+    public void saveRefValue(String identifier, String assignee) {
         if (!VAR_NAME_PATTERN.matcher(identifier).matches()) {
             throw new InputMismatchException("Invalid identifier");
         }
 
-        if (NUMBER.matcher(assignment).matches()) {
-            store.put(identifier, Integer.parseInt(assignment));
-            return;
-        }
         // right hand side is not valid name
-        if (!VAR_NAME_PATTERN.matcher(assignment).matches()) {
+        if (!VAR_NAME_PATTERN.matcher(assignee).matches()) {
             throw new InputMismatchException("Invalid assignment");
         }
         // right hand side is not key
-        if (!store.containsKey(assignment)) {
+        if (!store.containsKey(assignee)) {
             throw new InputMismatchException("Unknown variable");
         }
-        if (VAR_NAME_PATTERN.matcher(assignment).matches()) {
-            int temp = store.get(assignment);
-            store.put(identifier, temp);
+
+        T temp = store.get(assignee);
+        store.put(identifier, temp);
+    }
+
+    /*
+     * Save value T to storage
+     * e.g. n = 32
+     * */
+    private void saveValue(String identifier, T assignment) {
+        // left hand side is not valid name
+        String assignmentString = assignment.toString();
+
+        if (!VAR_NAME_PATTERN.matcher(identifier).matches()) {
+            throw new InputMismatchException("Invalid identifier");
+        }
+
+        if (NUMBER.matcher(assignmentString).matches()) {
+            store.put(identifier, assignment);
         }
     }
 
-    public int get(String identifier) {
+    public T get(String identifier) {
         if (!store.containsKey(identifier)) {
             throw new InputMismatchException("Unknown variable");
         }
@@ -56,7 +76,7 @@ public class Storage {
         Matcher matcher = Storage.VAR_NAME_PATTERN.matcher(input);
         while (matcher.find()) {
             String varName = matcher.group();
-            int value = store.get(varName);
+            T value = store.get(varName);
             input = input.replace(varName, String.valueOf(value));
         }
         return input;

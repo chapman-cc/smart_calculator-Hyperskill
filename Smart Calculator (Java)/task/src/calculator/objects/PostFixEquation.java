@@ -1,5 +1,6 @@
 package calculator.objects;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.regex.Matcher;
@@ -17,7 +18,7 @@ public class PostFixEquation {
         return String.join(" ", list);
     }
 
-    public static int calc(String equation) {
+    public static BigInteger calc(String equation) {
         equation = normalizeEquation(equation);
         Deque<String> stack = infixToPostfix(equation);
         return evaluatePostfix(stack);
@@ -78,21 +79,24 @@ public class PostFixEquation {
         return op1score <= op2score;
     }
 
-    private static int evaluatePostfix(Deque<String> stack) {
-        Deque<Integer> numbers = new ArrayDeque<>();
+    private static BigInteger evaluatePostfix(Deque<String> stack) {
+        Deque<BigInteger> numbers = new ArrayDeque<>();
         while (!stack.isEmpty()) {
-            String token = stack.removeLast();
-            if (token.matches(NUMBER.pattern())) {
-                numbers.push(Integer.parseInt(token));
+            String element = stack.removeLast();
+            if (element.matches(NUMBER.pattern())) {
+                BigInteger number = new BigInteger(element);
+                numbers.push(number);
+
             } else {
-                int number1 = numbers.pop();
-                int number2 = numbers.pop();
-                switch (token) {
-                    case "+" -> numbers.push(number2 + number1);
-                    case "-" -> numbers.push(number2 - number1);
-                    case "*" -> numbers.push(number2 * number1);
-                    case "/" -> numbers.push(number2 / number1);
-                    case "^" -> numbers.push((int) Math.pow(number2, number1));
+                BigInteger number1 = numbers.pop();
+                BigInteger number2 = numbers.pop();
+
+                switch (element) {
+                    case "+" -> numbers.push(number2.add(number1));
+                    case "-" -> numbers.push(number2.subtract(number1));
+                    case "*" -> numbers.push(number2.multiply(number1));
+                    case "/" -> numbers.push(number2.divide(number1));
+                    case "^" -> numbers.push(number2.pow(number1.intValue()));
                     default -> throw new RuntimeException("Invalid expression");
                 }
             }

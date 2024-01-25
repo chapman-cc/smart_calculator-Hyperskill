@@ -1,19 +1,19 @@
 package calculator;
 
 import calculator.objects.Command;
-import calculator.objects.Equation;
 import calculator.objects.PostFixEquation;
 import calculator.objects.Storage;
 
+import java.math.BigInteger;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Application {
-    public final Storage storage;
+    public final Storage<BigInteger> storage;
 
     public Application() {
-        this.storage = new Storage();
+        this.storage = new Storage<>();
     }
 
     public void run() {
@@ -31,7 +31,7 @@ public class Application {
                         continue;
                     }
                     if (input.contains("=")) {
-                        storage.save(input);
+                        storage.save(input, BigInteger::new);
                         continue;
                     }
                     if (Storage.VAR_NAME_PATTERN.matcher(input).matches()) {
@@ -41,7 +41,7 @@ public class Application {
 
                     if (Pattern.compile("[+-/*]").matcher(input).find()) {
                         input = storage.replaceVars(input);
-                        int calculation = PostFixEquation.calc(input);
+                        BigInteger calculation = PostFixEquation.calc(input);
                         System.out.println(calculation);
                         continue;
                     }
