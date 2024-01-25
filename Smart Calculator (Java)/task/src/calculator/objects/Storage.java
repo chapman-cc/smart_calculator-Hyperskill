@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static calculator.objects.Equation.NUMBER_PATTERN;
+import static calculator.objects.Equation.NUMBER;
 
 public class Storage {
     public static final Pattern VAR_NAME_PATTERN = Pattern.compile("[a-zA-Z]+");
@@ -15,7 +15,10 @@ public class Storage {
 
     public void save(String input) {
         String[] split = input.split("=");
-        save(split[0].trim(), split[1].trim());
+        String assigner = split[0].trim();
+        String assignee = split[1].trim();
+
+        save(assigner, assignee);
     }
 
     public void save(String identifier, String assignment) {
@@ -24,7 +27,7 @@ public class Storage {
             throw new InputMismatchException("Invalid identifier");
         }
 
-        if (NUMBER_PATTERN.matcher(assignment).matches()) {
+        if (NUMBER.matcher(assignment).matches()) {
             store.put(identifier, Integer.parseInt(assignment));
             return;
         }

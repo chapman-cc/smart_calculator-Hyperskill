@@ -2,10 +2,12 @@ package calculator;
 
 import calculator.objects.Command;
 import calculator.objects.Equation;
+import calculator.objects.PostFixEquation;
 import calculator.objects.Storage;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class Application {
     public final Storage storage;
@@ -19,7 +21,7 @@ public class Application {
         try (Scanner scanner = new Scanner(System.in);) {
             while (true) {
                 try {
-                    String input = scanner.nextLine();
+                    String input = scanner.nextLine().trim();
 
                     if (input.isEmpty()) {
                         continue;
@@ -37,9 +39,9 @@ public class Application {
                         continue;
                     }
 
-                    if (Equation.SYMBOL_PATTERN.matcher(input).find()) {
+                    if (Pattern.compile("[+-/*]").matcher(input).find()) {
                         input = storage.replaceVars(input);
-                        int calculation = new Equation(input).calc();
+                        int calculation = PostFixEquation.calc(input);
                         System.out.println(calculation);
                         continue;
                     }
